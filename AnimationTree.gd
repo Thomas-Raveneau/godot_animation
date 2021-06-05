@@ -19,7 +19,7 @@ func _process(delta):
 		is_moving = true
 	if (Input.is_action_pressed("move_right")):
 		is_moving = true
-	if (Input.is_action_pressed("jump")):
+	if (Input.is_action_just_pressed("jump") && get_parent().is_on_floor()):
 		is_jumping = true
 	
 	if (is_moving && !is_jumping):

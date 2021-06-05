@@ -6,129 +6,186 @@
 [ext_resource path="res://assets/Player/Run.anim" type="Animation" id=4]
 [ext_resource path="res://AnimationTree.gd" type="Script" id=5]
 [ext_resource path="res://assets/Player/Jump.anim" type="Animation" id=6]
+[ext_resource path="res://Player.gd" type="Script" id=7]
 
-[sub_resource type="GDScript" id=1]
-script/source = "extends KinematicBody
-
-var camera
-
-export var velocity = Vector3()
-
-const GRAVITY = -9.8
-const SPEED = 6
-const ACCELERATION = 3
-const DEACCELERATION = 5
-
-func _ready():
-	 pass
-
-func _physics_process(delta):
-	camera = $CameraTarget/Camera.get_global_transform()
-	var is_moving = false
-	var dir = Vector3()
-
-	if(Input.is_action_pressed(\"move_forward\")):
-		dir += -camera.basis[2]
-		is_moving = true
-	if(Input.is_action_pressed(\"move_backward\")):
-		dir += camera.basis[2]
-		is_moving = true
-	if(Input.is_action_pressed(\"move_left\")):
-		dir += -camera.basis[0]
-		is_moving = true
-	if(Input.is_action_pressed(\"move_right\")):
-		dir += camera.basis[0]
-		is_moving = true
-	
-	dir.y = 0
-	dir = dir.normalized()
-	
-	
-	velocity.y += delta * GRAVITY
-	
-	var hv = velocity
-	hv.y = 0
-	
-	var new_pos = dir * SPEED
-	var accel = DEACCELERATION
-	
-	if (dir.dot(hv) > 0):
-		accel = ACCELERATION
-	
-	hv = hv.linear_interpolate(new_pos, accel * delta)
-	
-	velocity.x = hv.x
-	velocity.z = hv.z 
-	
-	velocity = move_and_slide(velocity, Vector3(0, 1, 0))
-	
-	if (is_moving):
-		var angle = atan2(hv.x, hv.z)
-		var player_rot = self.get_rotation()
-		
-		player_rot.y = angle
-		self.set_rotation(player_rot)
-
-func handleInputs():
-	pass
-"
-
-[sub_resource type="CapsuleShape" id=2]
+[sub_resource type="CapsuleShape" id=1]
 radius = 0.626867
 height = 0.945911
 
-[sub_resource type="AnimationNodeBlend2" id=3]
+[sub_resource type="AnimationNodeAnimation" id=2]
+animation = "Idle"
 
-[sub_resource type="AnimationNodeOneShot" id=4]
-fadein_time = 0.2
-sync = true
-
-[sub_resource type="AnimationNodeAnimation" id=6]
-animation = "idle"
-
-[sub_resource type="AnimationNodeAnimation" id=7]
-animation = "Jump"
-
-[sub_resource type="AnimationNodeAnimation" id=8]
+[sub_resource type="AnimationNodeAnimation" id=3]
 animation = "Run"
 
-[sub_resource type="AnimationNodeBlendTree" id=9]
-graph_offset = Vector2( -1169.35, 470.75 )
-nodes/Blend2/node = SubResource( 3 )
-nodes/Blend2/position = Vector2( -420, 420 )
-nodes/OneShot/node = SubResource( 4 )
-nodes/OneShot/position = Vector2( -40, 580 )
-nodes/idle_animation/node = SubResource( 6 )
-nodes/idle_animation/position = Vector2( -760, 360 )
-nodes/jump_animation/node = SubResource( 7 )
-nodes/jump_animation/position = Vector2( -360, 660 )
-nodes/output/position = Vector2( 480, 580 )
-nodes/run_animation/node = SubResource( 8 )
-nodes/run_animation/position = Vector2( -760, 560 )
-node_connections = [ "output", 0, "OneShot", "OneShot", 0, "Blend2", "OneShot", 1, "jump_animation", "Blend2", 0, "idle_animation", "Blend2", 1, "run_animation" ]
+[sub_resource type="AnimationNodeAnimation" id=11]
+animation = "Jump"
+
+[sub_resource type="AnimationNodeBlend2" id=4]
+
+[sub_resource type="AnimationNodeOneShot" id=9]
+fadein_time = 0.05
+fadeout_time = 0.35
+
+[sub_resource type="AnimationNodeBlendTree" id=10]
+graph_offset = Vector2( -745.234, -54 )
+nodes/Animation/node = SubResource( 11 )
+nodes/Animation/position = Vector2( -380, 240 )
+"nodes/Animation 2/node" = SubResource( 2 )
+"nodes/Animation 2/position" = Vector2( -620, 0 )
+"nodes/Animation 3/node" = SubResource( 3 )
+"nodes/Animation 3/position" = Vector2( -620, 160 )
+nodes/Blend2/node = SubResource( 4 )
+nodes/Blend2/position = Vector2( -320, 20 )
+nodes/OneShot/node = SubResource( 9 )
+nodes/OneShot/position = Vector2( -60, 160 )
+node_connections = [ "output", 0, "OneShot", "Blend2", 0, "Animation 2", "Blend2", 1, "Animation 3", "OneShot", 0, "Blend2", "OneShot", 1, "Animation" ]
 
 [node name="Player" type="KinematicBody"]
-script = SubResource( 1 )
+script = ExtResource( 7 )
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
 
+[node name="Hips" parent="Player/RootNode" index="1"]
+transform = Transform( 0.96119, 0.0339802, -0.273787, -0.127758, 0.934391, -0.332554, 0.244524, 0.354626, 0.902468, 0, 0, 0 )
+
+[node name="Spine" parent="Player/RootNode/Hips" index="0"]
+transform = Transform( 0.998732, -0.00423139, 0.0501652, 0.00980941, 0.993719, -0.111475, -0.0493784, 0.111826, 0.9925, 0, 0, 0 )
+
+[node name="Spine1" parent="Player/RootNode/Hips/Spine" index="0"]
+transform = Transform( 0.99985, -0.00204173, 0.0171892, 0.00329558, 0.997309, -0.0732351, -0.0169934, 0.0732808, 0.997167, 0, 0, 0 )
+
+[node name="Spine2" parent="Player/RootNode/Hips/Spine/Spine1" index="0"]
+transform = Transform( 0.999894, -0.00327164, 0.0141895, 0.00430823, 0.997275, -0.0736495, -0.0139098, 0.0737028, 0.997183, 0, 0, 0 )
+
+[node name="Neck" parent="Player/RootNode/Hips/Spine/Spine1/Spine2" index="0"]
+transform = Transform( 0.99985, -0.0172569, 0.00132606, 0.0167347, 0.983455, 0.180379, -0.0044169, -0.18033, 0.983596, 0, 0, 0 )
+
+[node name="Head" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/Neck" index="0"]
+transform = Transform( 0.984634, -0.00852059, 0.174425, -0.059652, 0.922321, 0.381792, -0.164129, -0.38633, 0.90764, 0, 0, 0 )
+
+[node name="HeadTop_End" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/Neck/Head" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="LeftShoulder" parent="Player/RootNode/Hips/Spine/Spine1/Spine2" index="1"]
+transform = Transform( 0.98937, 0.140199, 0.0386194, -0.139963, 0.990118, -0.00875843, -0.0394657, 0.00326004, 0.999216, 0, 0, 0 )
+
+[node name="LeftArm" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder" index="0"]
+transform = Transform( 0.506767, 0.830471, -0.231313, -0.787657, 0.336976, -0.515794, -0.350405, 0.443583, 0.824895, 0, 0, 0 )
+
+[node name="LeftForeArm" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm" index="0"]
+transform = Transform( 0.525442, -0.0293129, -0.850325, 0.0150123, 0.99957, -0.0251812, 0.850697, 0.000465892, 0.525656, 0, 0, 0 )
+
+[node name="LeftHand" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm" index="0"]
+transform = Transform( 0.999732, 0.0198316, 0.0119835, -0.023171, 0.855198, 0.517783, 2.01296e-05, -0.517921, 0.855428, 0, 0, 0 )
+
+[node name="LeftHandIndex1" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand" index="0"]
+transform = Transform( 0.941357, 0.337108, 0.0143122, -0.337386, 0.940963, 0.0275673, -0.00417408, -0.0307794, 0.999518, 0, 0, 0 )
+
+[node name="LeftHandIndex2" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1" index="0"]
+transform = Transform( 0.931969, 0.359077, 0.049978, -0.359189, 0.933238, -0.00704216, -0.0491701, -0.0113885, 0.998725, 0, 0, 0 )
+
+[node name="LeftHandIndex3" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2" index="0"]
+transform = Transform( 0.997522, -0.0695407, -0.010722, 0.0695429, 0.997579, -0.000167364, 0.0107077, -0.000578689, 0.999942, 0, 0, 0 )
+
+[node name="LeftHandIndex4" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2/LeftHandIndex3" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="LeftHandThumb1" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand" index="1"]
+transform = Transform( 0.985781, -0.168013, -0.0025361, 0.167048, 0.981527, -0.0932739, 0.0181605, 0.091524, 0.995637, 0, 0, 0 )
+
+[node name="LeftHandThumb2" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1" index="0"]
+transform = Transform( 0.888058, -0.0551487, 0.456412, 0.0900757, 0.994409, -0.0551083, -0.450821, 0.090051, 0.88806, 0, 0, 0 )
+
+[node name="LeftHandThumb3" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2" index="0"]
+transform = Transform( 0.963367, -0.0105486, 0.267978, 0.0276674, 0.997804, -0.060186, -0.266754, 0.0653955, 0.961543, 0, 0, 0 )
+
+[node name="LeftHandThumb4" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2/LeftHandThumb3" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="RightShoulder" parent="Player/RootNode/Hips/Spine/Spine1/Spine2" index="2"]
+transform = Transform( 0.965626, -0.259174, 0.0198629, 0.259438, 0.965684, -0.0120941, -0.0160468, 0.0168316, 0.99973, 0, 0, 0 )
+
+[node name="RightArm" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder" index="0"]
+transform = Transform( 0.474263, -0.735675, 0.483587, 0.725922, 0.637558, 0.257985, -0.498108, 0.228694, 0.836414, 0, 0, 0 )
+
+[node name="RightForeArm" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm" index="0"]
+transform = Transform( 0.0798156, 0.0304182, 0.996345, -0.00514067, 0.999534, -0.0301037, -0.996796, -0.00271914, 0.0799348, 0, 0, 0 )
+
+[node name="RightHand" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm" index="0"]
+transform = Transform( 0.903908, 0.260722, 0.339079, -0.257858, 0.964653, -0.0543438, -0.341262, -0.0383122, 0.939187, 0, 0, 0 )
+
+[node name="RightHandIndex1" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand" index="0"]
+transform = Transform( 0.954377, -0.296024, -0.0391745, 0.296895, 0.95473, 0.0185611, 0.0319065, -0.029345, 0.99906, 0, 0, 0 )
+
+[node name="RightHandIndex2" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1" index="0"]
+transform = Transform( 0.931912, -0.359229, -0.0499402, 0.359333, 0.933182, -0.0071928, 0.0491871, -0.0112421, 0.998726, 0, 0, 0 )
+
+[node name="RightHandIndex3" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2" index="0"]
+transform = Transform( 0.987861, -0.155253, 0.00520471, 0.155237, 0.987872, 0.00333062, -0.00565867, -0.00248223, 0.999981, 0, 0, 0 )
+
+[node name="RightHandIndex4" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2/RightHandIndex3" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="RightHandThumb1" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand" index="1"]
+transform = Transform( 0.986255, 0.0833165, -0.142688, -0.0861741, 0.996182, -0.0139549, 0.140981, 0.0260591, 0.989669, 0, 0, 0 )
+
+[node name="RightHandThumb2" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1" index="0"]
+transform = Transform( 0.959963, 0.158281, -0.231122, -0.162946, 0.986634, -0.00111088, 0.227857, 0.0387269, 0.972924, 0, 0, 0 )
+
+[node name="RightHandThumb3" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2" index="0"]
+transform = Transform( 0.962192, 0.000690649, -0.27237, -0.0187792, 0.997785, -0.0638106, 0.271723, 0.066513, 0.960074, 0, 0, 0 )
+
+[node name="RightHandThumb4" parent="Player/RootNode/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2/RightHandThumb3" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="LeftUpLeg" parent="Player/RootNode/Hips" index="1"]
+transform = Transform( 0.97461, -0.197421, 0.105638, -0.00814631, 0.440216, 0.897855, -0.223759, -0.875919, 0.427431, 0, 0, 0 )
+
+[node name="LeftLeg" parent="Player/RootNode/Hips/LeftUpLeg" index="0"]
+transform = Transform( 0.98673, -0.0187152, 0.161288, 0.157666, -0.126937, -0.9793, 0.0388012, 0.991734, -0.122302, 0, 0, 0 )
+
+[node name="LeftFoot" parent="Player/RootNode/Hips/LeftUpLeg/LeftLeg" index="0"]
+transform = Transform( 0.97229, -0.137985, 0.18871, 0.180883, 0.955418, -0.23336, -0.148097, 0.261028, 0.953903, 0, 0, 0 )
+
+[node name="LeftToeBase" parent="Player/RootNode/Hips/LeftUpLeg/LeftLeg/LeftFoot" index="0"]
+transform = Transform( 1, -2.71352e-08, 7.75343e-08, 2.03389e-08, 0.996265, 0.0863476, -7.95878e-08, -0.0863476, 0.996265, 0, 0, 0 )
+
+[node name="LeftToe_End" parent="Player/RootNode/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftToeBase" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="RightUpLeg" parent="Player/RootNode/Hips" index="2"]
+transform = Transform( 0.982305, -0.183177, -0.0390267, 0.167091, 0.763009, 0.624418, -0.0846012, -0.61989, 0.780115, 0, 0, 0 )
+
+[node name="RightLeg" parent="Player/RootNode/Hips/RightUpLeg" index="0"]
+transform = Transform( 0.998912, 0.00256837, -0.0465616, -0.038111, 0.620352, -0.783397, 0.0268725, 0.784319, 0.619775, 0, 0, 0 )
+
+[node name="RightFoot" parent="Player/RootNode/Hips/RightUpLeg/RightLeg" index="0"]
+transform = Transform( 0.999548, 0.0292308, 0.00700497, -0.0293545, 0.899125, 0.436706, 0.00646693, -0.436715, 0.899577, 0, 0, 0 )
+
+[node name="RightToeBase" parent="Player/RootNode/Hips/RightUpLeg/RightLeg/RightFoot" index="0"]
+transform = Transform( 0.999994, 0.00339296, 0.000104406, -0.00338297, 0.993565, 0.113213, 0.000280394, -0.113213, 0.993571, 0, 0, 0 )
+
+[node name="RightToe_End" parent="Player/RootNode/Hips/RightUpLeg/RightLeg/RightFoot/RightToeBase" index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 1.09981, 0 )
-shape = SubResource( 2 )
+shape = SubResource( 1 )
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
-tree_root = SubResource( 9 )
+tree_root = SubResource( 10 )
 anim_player = NodePath("../AnimationPlayer")
 active = true
-parameters/Blend2/blend_amount = 0.0
+parameters/Blend2/blend_amount = 0
 parameters/OneShot/active = false
 script = ExtResource( 5 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../Player/RootNode")
+anims/Idle = ExtResource( 2 )
 anims/Jump = ExtResource( 6 )
 anims/Run = ExtResource( 4 )
-anims/idle = ExtResource( 2 )
 
 [node name="CameraTarget" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.83531, 0 )
